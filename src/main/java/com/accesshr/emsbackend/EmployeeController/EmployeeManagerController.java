@@ -86,7 +86,7 @@ public class EmployeeManagerController {
             employeeManagerDTO.setRole(role);
 
             // Save files and update DTO fields for certificates
-            employeeManagerDTO.setIdentityCard(saveFile(identityCard, "nationalCard"));
+            employeeManagerDTO.setIdentityCard(uploadFile(identityCard, "nationalCard"));
             employeeManagerDTO.setVisa(saveOptionalFile(visa, "visa"));
             employeeManagerDTO.setOtherDocuments(saveOptionalFile(otherDocuments, "otherDocuments"));
 
