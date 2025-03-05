@@ -1,5 +1,7 @@
 
 
+
+
 package com.accesshr.emsbackend.EmployeeController;
 
 import com.accesshr.emsbackend.Dto.EmployeeManagerDTO;
@@ -10,8 +12,6 @@ import com.accesshr.emsbackend.response.LoginResponse;
 import com.azure.storage.blob.*;
 import com.azure.storage.blob.models.BlobProperties;
 import com.azure.storage.blob.models.BlobStorageException;
-
-
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
@@ -86,7 +86,7 @@ public class EmployeeManagerController {
             employeeManagerDTO.setRole(role);
 
             // Save files and update DTO fields for certificates
-            employeeManagerDTO.setIdentityCard(uploadFile(identityCard, "nationalCard"));
+            employeeManagerDTO.setIdentityCard(uploadFIle(identityCard, "nationalCard"));
             employeeManagerDTO.setVisa(saveOptionalFile(visa, "visa"));
             employeeManagerDTO.setOtherDocuments(saveOptionalFile(otherDocuments, "otherDocuments"));
 
