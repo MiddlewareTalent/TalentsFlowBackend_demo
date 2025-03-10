@@ -30,8 +30,6 @@ public interface LeaveRequestRepo extends JpaRepository<LeaveRequest, Long> {
                                              @Param("leaveStartDate") LocalDate leaveStartDate,
                                              @Param("leaveEndDate") LocalDate leaveEndDate);
 
-
-
     @Query("SELECT SUM(lr.duration) " +
             "FROM LeaveRequest lr " +
             "WHERE lr.employeeId = :employeeId AND lr.leaveType = :leaveType " +
@@ -39,10 +37,8 @@ public interface LeaveRequestRepo extends JpaRepository<LeaveRequest, Long> {
     Optional<Integer> getTotalLeaveDaysByEmployeeIdAndLeaveType(@Param("employeeId") String employeeId,
                                                                 @Param("leaveType") LeaveRequest.LeaveType leaveType);
 
-
     @Modifying
     @Transactional
-    @Query("DELETE FROM LeaveRequest lr WHERE EXTRACT(YEAR FROM lr.leaveStartDate) < :year")
+    @Query("DELETE FROM LeaveRequest lr WHERE YEAR(lr.leaveStartDate) < :year")
     void resetLeaveBalancesForAllEmployees(@Param("year") int year);
-
 }
