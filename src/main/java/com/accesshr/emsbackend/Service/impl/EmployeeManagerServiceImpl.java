@@ -327,7 +327,7 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
                 .filter(emp->emp.getWorkingCountry().toLowerCase().equals(workingCountry.toLowerCase()))
                 .collect(Collectors.toList());
         }
-        return emp4.size() <= 16 ? emp4 : emp4.subList(0, 17);
+        return emp4.size() <= 16 ? emp4 : emp4.subList(0, 16);
     }
 
     public EmployeeManager changePassword(String employeeId, String newPassword) {
