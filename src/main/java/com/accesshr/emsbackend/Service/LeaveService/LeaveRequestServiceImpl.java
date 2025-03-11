@@ -29,31 +29,25 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     @Autowired
     private LeaveSheetRepository leaveSheetRepository;
 
-
-    // Defining maximum allowable leave limits for each leave type
-//    private static final int MAX_SICK_LEAVES = 6;
-//    private static final int MAX_VACATION_LEAVES = 4;
-//    private static final int MAX_CASUAL_LEAVES = 4;
-//    private static final int MAX_MARRIAGE_LEAVES = 3;
-//    private static final int MAX_PATERNITY_LEAVES = 2;
-//    private static final int MAX_MATERNITY_LEAVES = 4;
-//    private static final int MAX_OTHER_LEAVES = 2;
-
-
     public LeaveRequest submitLeaveRequest(LeaveRequest leaveRequest) {
-        // Validate if overlapping leaves exist if the status is REJECTED
-        if (leaveRequest.getLeaveStatus() == LeaveRequest.LeaveStatus.REJECTED) {
-            List<LeaveRequest> overlappingLeaves = leaveRequestRepository.findOverlappingLeaves(
-                    leaveRequest.getEmployeeId(), leaveRequest.getLeaveStartDate(), leaveRequest.getLeaveEndDate()
-            );
-            if (!overlappingLeaves.isEmpty()) {
-                throw new RuntimeException("You have already applied for overlapping leaves.");
-            }
-        }
+
         // Check if leave start and end dates are provided
         if (leaveRequest.getLeaveStartDate() == null || leaveRequest.getLeaveEndDate() == null) {
             throw new RuntimeException("Leave start date and end date must be provided.");
         }
+
+        long overlappingCount = leaveRequestRepository.countOverlappingLeaves(leaveRequest.getEmployeeId(), leaveRequest.getLeaveStartDate(), leaveRequest.getLeaveEndDate());
+        if (overlappingCount > 0) {
+            throw new RuntimeException("You have already applied for leave on one or more of these dates.");
+        }
+
+        // Validate if overlapping leaves exist if the status is REJECTED
+//        if (leaveRequest.getLeaveStatus() == LeaveRequest.LeaveStatus.REJECTED) {
+//            long overlapping = leaveRequestRepository.countOverlappingLeaves(leaveRequest.getEmployeeId(), leaveRequest.getLeaveStartDate(), leaveRequest.getLeaveEndDate());
+//            if (overlapping > 0) {
+//                throw new RuntimeException("You have already applied for leave on one or more of these dates.");
+//            }
+//        }
 
         Optional<LeaveRequest> existingLeave = leaveRequestRepository.findByEmployeeIdAndLeaveStartDateAndLeaveEndDate(
                 leaveRequest.getEmployeeId(), leaveRequest.getLeaveStartDate(), leaveRequest.getLeaveEndDate()
@@ -64,7 +58,6 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         }
 
         if (!leaveRequest.isLOP()){
-            System.out.println("h");
             validateLeaveBalance(leaveRequest);
         }
         // Validate leave balance based on the leave type

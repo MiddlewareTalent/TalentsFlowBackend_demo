@@ -125,6 +125,10 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
         }
     }
 
+    public boolean existsByCorporateEmail(String corporateEmail){
+        return employeeManagerRepository.existsByCorporateEmail(corporateEmail);
+    }
+
     @Override
     public List<EmployeeManagerDTO> getAllEmployees() {
         List<EmployeeManager> employees = employeeManagerRepository.findAll();

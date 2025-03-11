@@ -86,11 +86,13 @@ public class EmployeeManagerController {
             employeeManagerDTO.setRole(role);
 
             // Save files and update DTO fields for certificates
-            employeeManagerDTO.setIdentityCard(uploadFIle(identityCard, "nationalCard"));
+            employeeManagerDTO.setIdentityCard(saveOptionalFile(identityCard, "nationalCard"));
             employeeManagerDTO.setVisa(saveOptionalFile(visa, "visa"));
             employeeManagerDTO.setOtherDocuments(saveOptionalFile(otherDocuments, "otherDocuments"));
 
-
+            if(employeeManagerService.existsByCorporateEmail(corporateEmail)){
+                throw new RuntimeException("Corporate email already exists: "+corporateEmail);
+            }
             EmployeeManagerDTO employeeManager = employeeManagerService.addEmployee(employeeManagerDTO);
 
             return ResponseEntity.ok(employeeManager);
