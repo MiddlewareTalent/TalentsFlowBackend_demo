@@ -386,9 +386,13 @@ public class EmployeeManagerController {
     }
 
     @PostMapping("/change-password")
-    public ResponseEntity<String> changePassword(@RequestBody LoginDTO loginDTO) {
-        employeeManagerService.changePassword(loginDTO.getEmail(), loginDTO.getOldPassword(), loginDTO.getNewPassword());
-        return ResponseEntity.ok("Password changed successfully");
+    public ResponseEntity<?> changePassword(@RequestBody LoginDTO loginDTO) {
+        try {
+            boolean password = employeeManagerService.changePassword(loginDTO.getEmail(), loginDTO.getOldPassword(), loginDTO.getNewPassword());
+            return ResponseEntity.ok(password);
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to change password: " + e.getMessage());
+        }
     }
 
     @GetMapping(value ="/getEmployeesByWorkingCountry/{workingCountry}",produces = "application/json")
