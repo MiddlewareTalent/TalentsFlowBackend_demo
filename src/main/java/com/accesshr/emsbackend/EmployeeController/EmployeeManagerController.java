@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +63,12 @@ public class EmployeeManagerController {
             @RequestParam("employmentStatus") String employmentStatus,
             @RequestParam("reportingTo") String reportingTo,
             @RequestParam("role") String role,
+            @RequestParam(value = "dateOfBirth", required = false) LocalDate dateOfBirth,
+            @RequestParam(value = "dateOfJoining", required = false) LocalDate dateOfJoining,
+            @RequestParam(value = "task", required = false) boolean task,
+            @RequestParam(value = "organizationChart", required = false) boolean organizationChart,
+            @RequestParam(value = "timeSheet", required = false) boolean timeSheet,
+            @RequestParam(value = "leaveManagement", required = false) boolean leaveManagement,
             @RequestParam(value="identityCard" ,required = false) MultipartFile identityCard,
             @RequestParam(value = "visa", required = false) MultipartFile visa,
             @RequestParam(value = "otherDocuments", required = false) MultipartFile otherDocuments) {
@@ -81,6 +88,12 @@ public class EmployeeManagerController {
             employeeManagerDTO.setEmployeeId(employeeId);
             employeeManagerDTO.setCorporateEmail(corporateEmail);
             employeeManagerDTO.setJobRole(jobRole);
+            employeeManagerDTO.setDateOfJoining(dateOfJoining);
+            employeeManagerDTO.setDateOfBirth(dateOfBirth);
+            employeeManagerDTO.setTask(task);
+            employeeManagerDTO.setOrganizationChart(organizationChart);
+            employeeManagerDTO.setTimeSheet(timeSheet);
+            employeeManagerDTO.setLeaveManagement(leaveManagement);
             employeeManagerDTO.setEmploymentStatus(employmentStatus);
             employeeManagerDTO.setReportingTo(reportingTo);
             employeeManagerDTO.setRole(role);

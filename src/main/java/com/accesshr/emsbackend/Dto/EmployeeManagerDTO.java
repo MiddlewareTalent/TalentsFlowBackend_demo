@@ -1,6 +1,9 @@
 package com.accesshr.emsbackend.Dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
+
+import java.time.LocalDate;
 
 public class EmployeeManagerDTO {
     private int id;
@@ -23,6 +26,16 @@ public class EmployeeManagerDTO {
     private String jobRole;
     private String employmentStatus;
     private String reportingTo;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate dateOfBirth;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate dateOfJoining;
+
+    private boolean task;
+    private boolean organizationChart;
+    private boolean timeSheet;
+    private boolean leaveManagement;
     private String role;
     private String password;
     private String newPassword;
@@ -83,6 +96,54 @@ public class EmployeeManagerDTO {
 
     public String getCity() {
         return city;
+    }
+
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public LocalDate getDateOfJoining() {
+        return dateOfJoining;
+    }
+
+    public void setDateOfJoining(LocalDate dateOfJoining) {
+        this.dateOfJoining = dateOfJoining;
+    }
+
+    public boolean isTask() {
+        return task;
+    }
+
+    public void setTask(boolean task) {
+        this.task = task;
+    }
+
+    public boolean isOrganizationChart() {
+        return organizationChart;
+    }
+
+    public void setOrganizationChart(boolean organizationChart) {
+        this.organizationChart = organizationChart;
+    }
+
+    public boolean isTimeSheet() {
+        return timeSheet;
+    }
+
+    public void setTimeSheet(boolean timeSheet) {
+        this.timeSheet = timeSheet;
+    }
+
+    public boolean isLeaveManagement() {
+        return leaveManagement;
+    }
+
+    public void setLeaveManagement(boolean leaveManagement) {
+        this.leaveManagement = leaveManagement;
     }
 
     public void setCity(String city) {

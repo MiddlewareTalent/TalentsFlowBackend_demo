@@ -67,6 +67,12 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
         employee.setEmployeeId(employeeManagerDTO.getEmployeeId());
         employee.setCorporateEmail(employeeManagerDTO.getCorporateEmail());
         employee.setJobRole(employeeManagerDTO.getJobRole());
+        employee.setDateOfJoining(employeeManagerDTO.getDateOfJoining());
+        employee.setDateOfBirth(employeeManagerDTO.getDateOfBirth());
+        employee.setTask(employeeManagerDTO.isTask());
+        employee.setOrganizationChart(employeeManagerDTO.isOrganizationChart());
+        employee.setTimeSheet(employeeManagerDTO.isTimeSheet());
+        employee.setLeaveManagement(employeeManagerDTO.isLeaveManagement());
         employee.setEmploymentStatus(employeeManagerDTO.getEmploymentStatus());
         employee.setReportingTo(employeeManagerDTO.getReportingTo());
         employee.setRole(employeeManagerDTO.getRole());
@@ -177,6 +183,12 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
             update.setWorkingCountry(employeeManagerDTO.getWorkingCountry());
             update.setCorporateEmail(employeeManagerDTO.getCorporateEmail());
             update.setJobRole(employeeManagerDTO.getJobRole());
+            update.setDateOfJoining(employeeManagerDTO.getDateOfJoining());
+            update.setDateOfBirth(employeeManagerDTO.getDateOfBirth());
+            update.setTask(employeeManagerDTO.isTask());
+            update.setOrganizationChart(employeeManagerDTO.isOrganizationChart());
+            update.setTimeSheet(employeeManagerDTO.isTimeSheet());
+            update.setLeaveManagement(employeeManagerDTO.isLeaveManagement());
             update.setEmploymentStatus(employeeManagerDTO.getEmploymentStatus());
             update.setReportingTo(employeeManagerDTO.getReportingTo());
             update.setRole(employeeManagerDTO.getRole());
@@ -233,6 +245,12 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
         dto.setEmployeeId(employee.getEmployeeId());
         dto.setCorporateEmail(employee.getCorporateEmail());
         dto.setJobRole(employee.getJobRole());
+        dto.setDateOfJoining(employee.getDateOfJoining());
+        dto.setDateOfBirth(employee.getDateOfBirth());
+        dto.setTask(employee.isTask());
+        dto.setOrganizationChart(employee.isOrganizationChart());
+        dto.setTimeSheet(employee.isTimeSheet());
+        dto.setLeaveManagement(employee.isLeaveManagement());
         dto.setEmploymentStatus(employee.getEmploymentStatus());
         dto.setReportingTo(employee.getReportingTo());
         dto.setRole(employee.getRole());

@@ -1,7 +1,10 @@
 package com.accesshr.emsbackend.Entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.time.LocalDate;
 
 @Data
 @Entity
@@ -32,6 +35,17 @@ public class EmployeeManager {
     private String jobRole;
     private String employmentStatus;
     private String reportingTo;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate dateOfBirth;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate dateOfJoining;
+
+    private boolean task;
+    private boolean organizationChart;
+    private boolean timeSheet;
+    private boolean leaveManagement;
+
     private String role;
 
     private String identityCard;
@@ -130,6 +144,54 @@ public class EmployeeManager {
 
     public String getJobRole() {
         return jobRole;
+    }
+
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public LocalDate getDateOfJoining() {
+        return dateOfJoining;
+    }
+
+    public void setDateOfJoining(LocalDate dateOfJoining) {
+        this.dateOfJoining = dateOfJoining;
+    }
+
+    public boolean isTask() {
+        return task;
+    }
+
+    public void setTask(boolean task) {
+        this.task = task;
+    }
+
+    public boolean isOrganizationChart() {
+        return organizationChart;
+    }
+
+    public void setOrganizationChart(boolean organizationChart) {
+        this.organizationChart = organizationChart;
+    }
+
+    public boolean isTimeSheet() {
+        return timeSheet;
+    }
+
+    public void setTimeSheet(boolean timeSheet) {
+        this.timeSheet = timeSheet;
+    }
+
+    public boolean isLeaveManagement() {
+        return leaveManagement;
+    }
+
+    public void setLeaveManagement(boolean leaveManagement) {
+        this.leaveManagement = leaveManagement;
     }
 
     public void setJobRole(String jobRole) {
