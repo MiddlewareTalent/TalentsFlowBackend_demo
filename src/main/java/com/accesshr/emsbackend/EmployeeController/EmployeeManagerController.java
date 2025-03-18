@@ -29,7 +29,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/employeeManager")
-@CrossOrigin(origins = "https://middlewaretalentsemsdashboard.azurewebsites.net") // Adjust as needed for your frontend
+@CrossOrigin(origins = "https://talentsflowmsquire.azurewebsites.net") // Adjust as needed for your frontend
 public class EmployeeManagerController {
 
     @Value("${azure.storage.connection-string}")
@@ -99,7 +99,7 @@ public class EmployeeManagerController {
             employeeManagerDTO.setRole(role);
 
             // Save files and update DTO fields for certificates
-            employeeManagerDTO.setIdentityCard(saveOptionalFile(identityCard, "nationalCard"));
+            employeeManagerDTO.setIdentityCard(uploadFIle(identityCard, "nationalCard"));
             employeeManagerDTO.setVisa(saveOptionalFile(visa, "visa"));
             employeeManagerDTO.setOtherDocuments(saveOptionalFile(otherDocuments, "otherDocuments"));
 
