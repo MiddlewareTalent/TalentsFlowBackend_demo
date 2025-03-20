@@ -65,7 +65,6 @@ public class EmployeeManagerController {
             @RequestParam("employmentStatus") String employmentStatus,
             @RequestParam("reportingTo") String reportingTo,
             @RequestParam("role") String role,
-
             @RequestParam(value = "dateOfBirth", required = false) LocalDate dateOfBirth,
             @RequestParam(value = "dateOfJoining", required = false) LocalDate dateOfJoining,
             @RequestParam(value = "task", required = false) boolean task,
