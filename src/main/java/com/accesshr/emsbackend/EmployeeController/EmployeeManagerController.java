@@ -413,6 +413,11 @@ public class EmployeeManagerController {
         return employeeManagerService.getEmployeesByWorkingCountry(workingCountry);
     }
 
+    @GetMapping(value = "/getEmployeesForTasks/{employeeId}", produces = "application/json")
+    public List <EmployeeManager> getReportingEmployeesForTasks(@PathVariable String employeeId){
+        return employeeManagerService.getReportingEmployeesForTasks(employeeId);
+    }
+
 }
 
 

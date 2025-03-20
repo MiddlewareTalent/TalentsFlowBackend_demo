@@ -32,4 +32,11 @@ public interface EmployeeManagerRepository extends JpaRepository<EmployeeManager
     @Query("SELECT e FROM EmployeeManager e WHERE e.reportingTo = :employeeId AND e.workingCountry = :workingCountry")
     List<EmployeeManager> findReportingTOByWorkingCountry(@Param("employeeId") String employeeId, 
                                                          @Param("workingCountry") String workingCountry);
+
+
+    @Query("SELECT e FROM EmployeeManager e WHERE e.reportingTo = :employeeId AND e.task = :task")
+    List<EmployeeManager> findReportingEmployeesForTasks(@Param("employeeId") String employeeId, @Param("task") Boolean task);
+                                                         
+
+    
 }

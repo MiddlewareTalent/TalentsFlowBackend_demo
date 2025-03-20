@@ -37,5 +37,7 @@ public interface EmployeeManagerService {
     boolean changePassword(String email, String oldPassword, String newPassword);
     List <EmployeeManager> getEmployeesByWorkingCountry(String workingCountry);
     boolean existsByCorporateEmail(String corporateEmail);
+
+    List <EmployeeManager> getReportingEmployeesForTasks(String employeeId);
 }
 

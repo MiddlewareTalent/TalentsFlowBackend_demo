@@ -383,4 +383,10 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
         return true;
     }
 
+    @Override
+
+    public List<EmployeeManager> getReportingEmployeesForTasks(String employeeId){
+        return employeeManagerRepository.findReportingEmployeesForTasks(employeeId, true);
+    }
+
 }
