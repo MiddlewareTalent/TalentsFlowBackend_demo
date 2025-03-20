@@ -79,6 +79,7 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
         employee.setIdentityCard(employeeManagerDTO.getIdentityCard());
         employee.setVisa(employeeManagerDTO.getVisa());
         employee.setOtherDocuments(employeeManagerDTO.getOtherDocuments());
+        employee.setProfilePhoto(employeeManagerDTO.getProfilePhoto());
         // Generate or use the provided password
         String password = employeeManagerDTO.getPassword() != null ? employeeManagerDTO.getPassword()
                 : UUID.randomUUID().toString().substring(0, 8); // Generate random password if not provided
@@ -196,6 +197,7 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
             update.setIdentityCard(employeeManagerDTO.getIdentityCard());
             update.setOtherDocuments(employeeManagerDTO.getOtherDocuments());
             update.setPassword(employeeManagerDTO.getPassword());
+            update.setProfilePhoto(employeeManagerDTO.getProfilePhoto());
             employeeManagerRepository.save(update);
         }
         return null;
@@ -257,6 +259,7 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
         dto.setIdentityCard(employee.getIdentityCard());
         dto.setVisa(employee.getVisa());
         dto.setOtherDocuments(employee.getOtherDocuments());
+        dto.setProfilePhoto(employee.getProfilePhoto());
         return dto;
     }
 

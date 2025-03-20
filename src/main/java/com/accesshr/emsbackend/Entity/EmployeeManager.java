@@ -54,6 +54,8 @@ public class EmployeeManager {
 
     private String password; // Added password field
 
+    private String profilePhoto;
+
     public int getId() {
         return id;
     }
@@ -269,6 +271,14 @@ public class EmployeeManager {
 
     public void setOtherDocuments(String otherDocuments) {
         this.otherDocuments = otherDocuments;
+    }
+
+    public String getProfilePhoto() {
+        return profilePhoto;
+    }
+
+    public void setProfilePhoto(String profilePhoto) {
+        this.profilePhoto = profilePhoto;
     }
 }
 

@@ -22,7 +22,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +65,7 @@ public class EmployeeManagerController {
             @RequestParam("employmentStatus") String employmentStatus,
             @RequestParam("reportingTo") String reportingTo,
             @RequestParam("role") String role,
+
             @RequestParam(value = "dateOfBirth", required = false) LocalDate dateOfBirth,
             @RequestParam(value = "dateOfJoining", required = false) LocalDate dateOfJoining,
             @RequestParam(value = "task", required = false) boolean task,
@@ -71,7 +74,10 @@ public class EmployeeManagerController {
             @RequestParam(value = "leaveManagement", required = false) boolean leaveManagement,
             @RequestParam(value="identityCard" ,required = false) MultipartFile identityCard,
             @RequestParam(value = "visa", required = false) MultipartFile visa,
-            @RequestParam(value = "otherDocuments", required = false) MultipartFile otherDocuments) {
+            @RequestParam(value = "otherDocuments", required = false) MultipartFile otherDocuments,
+            @RequestParam(value = "profilePhoto", required = false) MultipartFile profilePhoto)
+
+    {
 
         try {
             EmployeeManagerDTO employeeManagerDTO = new EmployeeManagerDTO();
@@ -97,7 +103,7 @@ public class EmployeeManagerController {
             employeeManagerDTO.setEmploymentStatus(employmentStatus);
             employeeManagerDTO.setReportingTo(reportingTo);
             employeeManagerDTO.setRole(role);
-
+            employeeManagerDTO.setProfilePhoto(saveOptionalFile(profilePhoto,"profilePhoto"));
             // Save files and update DTO fields for certificates
             employeeManagerDTO.setIdentityCard(uploadFIle(identityCard, "nationalCard"));
             employeeManagerDTO.setVisa(saveOptionalFile(visa, "visa"));
@@ -286,21 +292,21 @@ public class EmployeeManagerController {
         }
     }
 
-    @DeleteMapping("/employees/{id}")
-    public ResponseEntity<String> deleteEmployee(@PathVariable("id") int id) {
-        try {
-            boolean isDeleted = employeeManagerService.deleteById(id);
-            if (isDeleted) {
-                return ResponseEntity.ok("Employee deleted successfully");
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee not found");
-            }
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete employee: " + e.getMessage());
-        }
-    }
+//    @DeleteMapping("/employees/{id}")
+//    public ResponseEntity<String> deleteEmployee(@PathVariable("id") int id) {
+//        try {
+//            boolean isDeleted = employeeManagerService.deleteById(id);
+//            if (isDeleted) {
+//                return ResponseEntity.ok("Employee deleted successfully");
+//            } else {
+//                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee not found");
+//            }
+//        } catch (EntityNotFoundException e) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete employee: " + e.getMessage());
+//        }
+//    }
 
 
     // New endpoint to get file size
@@ -418,6 +424,48 @@ public class EmployeeManagerController {
         return employeeManagerService.getReportingEmployeesForTasks(employeeId);
     }
 
+    private void deleteBlobs(List<String> blobUrls) {
+        BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(connectionString).buildClient();
+        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerName);
+
+        for (String blobUrl : blobUrls) {
+            if (blobUrl != null && !blobUrl.trim().isEmpty()) {
+                try {
+                    URL url = new URL(blobUrl);
+                    String blobName = url.getPath().substring(url.getPath().indexOf(containerName) + containerName.length() + 1);
+
+                    BlobClient blobClient = containerClient.getBlobClient(blobName);
+                    if (blobClient.exists()) {
+                        blobClient.delete();
+                        System.out.println("Successfully deleted blob: " + blobUrl);
+                    } else {
+                        System.out.println("Blob not found: " + blobUrl);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error deleting blob: " + blobUrl + " - " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    @DeleteMapping("/employees/{id}")
+    public ResponseEntity<String> deleteEmployee(@PathVariable int id) {
+
+
+        EmployeeManagerDTO employee = employeeManagerService.getById(id);
+        System.out.println(employee);
+
+        boolean isDeleted = employeeManagerService.deleteById(id);
+
+        if (isDeleted) {
+            // Delete associated files in Azure Blob Storage
+            deleteBlobs(Arrays.asList(employee.getIdentityCard(), employee.getVisa(), employee.getOtherDocuments()));
+
+            return ResponseEntity.ok("Employee and associated files deleted successfully");
+        } else {
+            return ResponseEntity.status(500).body("Failed to delete employee");
+        }
+    }
 }
 
 

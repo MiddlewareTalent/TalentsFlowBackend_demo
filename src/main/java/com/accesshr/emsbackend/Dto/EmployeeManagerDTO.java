@@ -39,7 +39,7 @@ public class EmployeeManagerDTO {
     private String role;
     private String password;
     private String newPassword;
-
+    private String profilePhoto;
     // Document file paths or names
     private String identityCard;
     private String visa;
@@ -271,5 +271,13 @@ public class EmployeeManagerDTO {
 
     public void setNewPassword(String newPassword) {
         this.newPassword = newPassword;
+    }
+
+    public String getProfilePhoto() {
+        return profilePhoto;
+    }
+
+    public void setProfilePhoto(String profilePhoto) {
+        this.profilePhoto = profilePhoto;
     }
 }
