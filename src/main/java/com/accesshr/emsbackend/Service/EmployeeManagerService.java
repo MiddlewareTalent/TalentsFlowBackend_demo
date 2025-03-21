@@ -39,5 +39,7 @@ public interface EmployeeManagerService {
     boolean existsByCorporateEmail(String corporateEmail);
 
     List <EmployeeManager> getReportingEmployeesForTasks(String employeeId);
+
+    List <EmployeeManager> getAllEmployeesByOrder();
 }
 

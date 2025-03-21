@@ -36,6 +36,12 @@ public interface EmployeeManagerRepository extends JpaRepository<EmployeeManager
 
     @Query("SELECT e FROM EmployeeManager e WHERE e.reportingTo = :employeeId AND e.task = :task")
     List<EmployeeManager> findReportingEmployeesForTasks(@Param("employeeId") String employeeId, @Param("task") Boolean task);
+
+    @Query("SELECT e FROM EmployeeManager e ORDER BY e.firstName DESC, e.lastName DESC")
+    List<EmployeeManager> findAllEmployeesBYOrder();
+
+    @Query("SELECT e FROM EmployeeManager e WHERE e.role!='employee' ORDER BY e.firstName DESC, e.lastName DESC")
+    List<EmployeeManager> getAdminAndManager();
                                                          
 
     
