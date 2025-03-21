@@ -23,10 +23,14 @@ public interface EmployeeManagerRepository extends JpaRepository<EmployeeManager
     // Find Employees by their Reporting Manager
     List<EmployeeManager> findByReportingTo(String empId);
 
-    // Find Employees by their Working Country
-    List<EmployeeManager> findByWorkingCountry(String workingCountry);
+    
 
     boolean existsByCorporateEmail(String corporateEmail);
+
+    // Find Employees by their Working Country
+    @Query("SELECT e FROM EmployeeManager e WHERE e.workingCountry = :workingCountry ORDER BY e.firstName ASC, e.lastName ASC")
+    List<EmployeeManager> getEmployeeManagersByCountry(@Param("workingCountry") String workingCountry);
+    
 
     // Custom query to find Employees by their Reporting Manager and Working Country
     @Query("SELECT e FROM EmployeeManager e WHERE e.reportingTo = :employeeId AND e.workingCountry = :workingCountry ORDER BY e.firstName ASC, e.lastName ASC")

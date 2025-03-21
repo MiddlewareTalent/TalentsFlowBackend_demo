@@ -145,7 +145,7 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
     @Override
 
     public List <EmployeeManager> getEmployeesByWorkingCountry(String workingCountry){
-        return employeeManagerRepository.findByWorkingCountry(workingCountry);
+        return employeeManagerRepository.getEmployeeManagersByCountry(workingCountry);
     }
 
     @Override
