@@ -29,18 +29,18 @@ public interface EmployeeManagerRepository extends JpaRepository<EmployeeManager
     boolean existsByCorporateEmail(String corporateEmail);
 
     // Custom query to find Employees by their Reporting Manager and Working Country
-    @Query("SELECT e FROM EmployeeManager e WHERE e.reportingTo = :employeeId AND e.workingCountry = :workingCountry")
+    @Query("SELECT e FROM EmployeeManager e WHERE e.reportingTo = :employeeId AND e.workingCountry = :workingCountry ORDER BY e.firstName ASC, e.lastName ASC")
     List<EmployeeManager> findReportingTOByWorkingCountry(@Param("employeeId") String employeeId, 
                                                          @Param("workingCountry") String workingCountry);
 
 
-    @Query("SELECT e FROM EmployeeManager e WHERE e.reportingTo = :employeeId AND e.task = :task")
+    @Query("SELECT e FROM EmployeeManager e WHERE e.reportingTo = :employeeId AND e.task = :task ORDER BY e.firstName ASC, e.lastName ASC")
     List<EmployeeManager> findReportingEmployeesForTasks(@Param("employeeId") String employeeId, @Param("task") Boolean task);
 
-    @Query("SELECT e FROM EmployeeManager e ORDER BY e.firstName DESC, e.lastName DESC")
+    @Query("SELECT e FROM EmployeeManager e ORDER BY e.firstName ASC, e.lastName ASC")
     List<EmployeeManager> findAllEmployeesBYOrder();
 
-    @Query("SELECT e FROM EmployeeManager e WHERE e.role!='employee' ORDER BY e.firstName DESC, e.lastName DESC")
+    @Query("SELECT e FROM EmployeeManager e WHERE e.role!='employee' ORDER BY e.firstName ASC, e.lastName ASC")
     List<EmployeeManager> getAdminsAndManagers();
                                                          
 
