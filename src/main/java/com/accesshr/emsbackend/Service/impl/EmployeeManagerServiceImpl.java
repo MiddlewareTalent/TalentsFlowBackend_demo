@@ -397,4 +397,9 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
         return employeeManagerRepository.findAllEmployeesBYOrder();
     }
 
+    @Override
+    public List <EmployeeManager> getAllAdminsAndManagers(){
+        return employeeManagerRepository.getAdminsAndManagers();
+    }
+
 }

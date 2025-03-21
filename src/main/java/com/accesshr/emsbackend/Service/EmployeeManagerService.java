@@ -41,5 +41,7 @@ public interface EmployeeManagerService {
     List <EmployeeManager> getReportingEmployeesForTasks(String employeeId);
 
     List <EmployeeManager> getAllEmployeesByOrder();
+
+    List <EmployeeManager> getAllAdminsAndManagers();
 }
 

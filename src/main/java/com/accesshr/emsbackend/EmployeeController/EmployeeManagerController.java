@@ -475,6 +475,16 @@ public class EmployeeManagerController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch employees: " + e.getMessage());
         }
     }
+
+    @GetMapping(value = "/AdminsAndManagers", produces = "application/json")
+    public ResponseEntity<?> getAllAdminsAndManagers() {
+        try {
+            List<EmployeeManager> employees = employeeManagerService.getAllAdminsAndManagers();
+            return ResponseEntity.ok(employees);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch employees: " + e.getMessage());
+        }
+    }
 }
 
 
