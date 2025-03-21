@@ -21,7 +21,8 @@ public interface EmployeeManagerRepository extends JpaRepository<EmployeeManager
     boolean existsByEmployeeId(String employeeId);
 
     // Find Employees by their Reporting Manager
-    List<EmployeeManager> findByReportingTo(String empId);
+    @Query("SELECT e FROM EmployeeManager e WHERE e.reportingTo=:reportingTo ORDER BY firstName ASC, lastName ASC")
+    List<EmployeeManager> findByReportingTo(@Param ("reportingTo") String reportingTo);
 
     
 
