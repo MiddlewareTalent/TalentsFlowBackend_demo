@@ -65,7 +65,6 @@ public class EmployeeManagerController {
             @RequestParam("employmentStatus") String employmentStatus,
             @RequestParam("reportingTo") String reportingTo,
             @RequestParam("role") String role,
-
             @RequestParam(value = "dateOfBirth", required = false) LocalDate dateOfBirth,
             @RequestParam(value = "dateOfJoining", required = false) LocalDate dateOfJoining,
             @RequestParam(value = "task", required = false) boolean task,
@@ -464,6 +463,26 @@ public class EmployeeManagerController {
             return ResponseEntity.ok("Employee and associated files deleted successfully");
         } else {
             return ResponseEntity.status(500).body("Failed to delete employee");
+        }
+    }
+
+    @GetMapping(value = "/employeesByOrder", produces = "application/json")
+    public ResponseEntity<?> getAllEmployeesByOrder() {
+        try {
+            List<EmployeeManager> employees = employeeManagerService.getAllEmployeesByOrder();
+            return ResponseEntity.ok(employees);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch employees: " + e.getMessage());
+        }
+    }
+
+    @GetMapping(value = "/AdminsAndManagers", produces = "application/json")
+    public ResponseEntity<?> getAllAdminsAndManagers() {
+        try {
+            List<EmployeeManager> employees = employeeManagerService.getAllAdminsAndManagers();
+            return ResponseEntity.ok(employees);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch employees: " + e.getMessage());
         }
     }
 }

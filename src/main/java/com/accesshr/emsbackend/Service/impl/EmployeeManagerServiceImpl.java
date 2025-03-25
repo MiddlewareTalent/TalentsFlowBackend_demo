@@ -145,7 +145,7 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
     @Override
 
     public List <EmployeeManager> getEmployeesByWorkingCountry(String workingCountry){
-        return employeeManagerRepository.findByWorkingCountry(workingCountry);
+        return employeeManagerRepository.getEmployeeManagersByCountry(workingCountry);
     }
 
     @Override
@@ -390,6 +390,16 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
 
     public List<EmployeeManager> getReportingEmployeesForTasks(String employeeId){
         return employeeManagerRepository.findReportingEmployeesForTasks(employeeId, true);
+    }
+
+    @Override
+    public List <EmployeeManager> getAllEmployeesByOrder(){
+        return employeeManagerRepository.findAllEmployeesBYOrder();
+    }
+
+    @Override
+    public List <EmployeeManager> getAllAdminsAndManagers(){
+        return employeeManagerRepository.getAdminsAndManagers();
     }
 
 }
