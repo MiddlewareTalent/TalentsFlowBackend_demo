@@ -30,6 +30,7 @@ public class HolidayService {
     public List<Holiday> getAllHolidays() {
     	 LocalDate currentDate = LocalDate.now();
     	  holidayRepo.deletePreviousHoliday(currentDate);
+          System.out.println("The past holidays are deleted");
          return holidayRepo.findAll();  
     }
 }
