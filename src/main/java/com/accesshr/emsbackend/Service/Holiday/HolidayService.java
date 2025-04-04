@@ -1,10 +1,13 @@
 package com.accesshr.emsbackend.Service.Holiday;
 
+import java.util.List;
+import java.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import com.accesshr.emsbackend.Entity.Holiday;
 import com.accesshr.emsbackend.Repo.Holiday.HolidayRepo;
-import java.util.List;  // Import List
+import java.util.*;
 
 @Service
 public class HolidayService {
@@ -25,6 +28,8 @@ public class HolidayService {
 
     // Get all holidays
     public List<Holiday> getAllHolidays() {
-        return holidayRepo.findAll();  // Return the list of holidays
+    	 LocalDate currentDate = LocalDate.now();
+    	  holidayRepo.deletePreviousHoliday(currentDate);
+         return holidayRepo.findAll();  
     }
 }
