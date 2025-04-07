@@ -4,23 +4,6 @@
 
 package com.accesshr.emsbackend.EmployeeController;
 
-import com.accesshr.emsbackend.Dto.EmployeeManagerDTO;
-import com.accesshr.emsbackend.Dto.LoginDTO;
-import com.accesshr.emsbackend.Entity.EmployeeManager;
-import com.accesshr.emsbackend.Service.EmployeeManagerService;
-import com.accesshr.emsbackend.response.LoginResponse;
-import com.azure.storage.blob.*;
-import com.azure.storage.blob.models.BlobProperties;
-import com.azure.storage.blob.models.BlobStorageException;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
@@ -28,6 +11,36 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.accesshr.emsbackend.Dto.EmployeeManagerDTO;
+import com.accesshr.emsbackend.Dto.LoginDTO;
+import com.accesshr.emsbackend.Entity.EmployeeManager;
+import com.accesshr.emsbackend.Service.EmployeeManagerService;
+import com.accesshr.emsbackend.response.LoginResponse;
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobClientBuilder;
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.azure.storage.blob.models.BlobProperties;
+import com.azure.storage.blob.models.BlobStorageException;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/employeeManager")
@@ -381,7 +394,7 @@ public class EmployeeManagerController {
     
     @GetMapping(value="/myColleague/{managerId}")
     public ResponseEntity<List<EmployeeManager>> getMyColleague(@PathVariable String managerId) throws Exception{
-    	List<EmployeeManager> myColleague = employeeManagerService.getAllMyColleagues(managerId);
+    	List<EmployeeManager> myColleague = employeeManagerService.getAllMyColleagues(managerId);//
     	if(myColleague.isEmpty()) {
     		throw new Exception("no employees found to ID: "+ managerId);
     	}

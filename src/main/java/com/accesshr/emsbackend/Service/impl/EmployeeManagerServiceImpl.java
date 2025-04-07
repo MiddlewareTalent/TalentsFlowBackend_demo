@@ -1,12 +1,12 @@
 package com.accesshr.emsbackend.Service.impl;
 
-import com.accesshr.emsbackend.Dto.EmployeeManagerDTO;
-import com.accesshr.emsbackend.Dto.LoginDTO;
-import com.accesshr.emsbackend.Entity.EmployeeManager;
-import com.accesshr.emsbackend.Repo.EmployeeManagerRepository;
-import com.accesshr.emsbackend.Service.EmployeeManagerService;
-import com.accesshr.emsbackend.Service.JWT.JWTService;
-import com.accesshr.emsbackend.response.LoginResponse;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,14 +15,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import static org.yaml.snakeyaml.nodes.Tag.STR;
+import com.accesshr.emsbackend.Dto.EmployeeManagerDTO;
+import com.accesshr.emsbackend.Dto.LoginDTO;
+import com.accesshr.emsbackend.Entity.EmployeeManager;
+import com.accesshr.emsbackend.Repo.EmployeeManagerRepository;
+import com.accesshr.emsbackend.Service.EmployeeManagerService;
+import com.accesshr.emsbackend.Service.JWT.JWTService;
+import com.accesshr.emsbackend.response.LoginResponse;
 
 @Service
 public class EmployeeManagerServiceImpl implements EmployeeManagerService {
@@ -405,11 +404,12 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
 	@Override
 	public List<EmployeeManager> getAllMyColleagues(String managerId) {
 		EmployeeManager emp = employeeManagerRepository.findByEmployeeId(managerId);
+       
         if (emp == null) {
             return Collections.emptyList(); // Return empty list if employee does not exist
         }
         else{   
-            return employeeManagerRepository.findByReportingTo(managerId);
+            return employeeManagerRepository.findByReportingTo(managerId);//
         }
 	}
 

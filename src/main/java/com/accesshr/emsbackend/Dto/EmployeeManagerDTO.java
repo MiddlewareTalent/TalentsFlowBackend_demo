@@ -1,9 +1,10 @@
 package com.accesshr.emsbackend.Dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.Column;
-
 import java.time.LocalDate;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import jakarta.persistence.Column;
 
 public class EmployeeManagerDTO {
     private int id;
@@ -204,7 +205,7 @@ public class EmployeeManagerDTO {
         this.employeeId = employeeId;
     }
 
-    public void setCorporateEmail(String corporateEmail) {
+    public void setCorporateEmail(String corporateEmail) {//
         this.corporateEmail = corporateEmail;
     }
 
