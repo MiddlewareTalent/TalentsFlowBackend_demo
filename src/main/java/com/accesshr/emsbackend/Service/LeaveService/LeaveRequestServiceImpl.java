@@ -59,6 +59,8 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
         if (!leaveRequest.isLOP()){
             validateLeaveBalance(leaveRequest);
+        }else {
+            validateLeaveBalance(leaveRequest);
         }
         // Validate leave balance based on the leave type
 //        validateLeaveBalance(leaveRequest);
@@ -109,9 +111,20 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         double requestedLeaveDays = leaveRequest.calculateBusinessDays(leaveRequest.getLeaveStartDate(), leaveRequest.getLeaveEndDate(), HolidaysUtil.getNationalHolidays(leaveRequest.getLeaveStartDate().getYear()));
 
         double remainingLeaveDays = maxLeaves - totalLeaveDaysTaken;
-        if (totalLeaveDaysTaken + requestedLeaveDays > maxLeaves) {
-            throw new ResourceNotFoundException(true,"You have exhausted your " + leaveRequest.getLeaveType().name().toLowerCase() + " leave limit of " + maxLeaves + " days. You have " + remainingLeaveDays + " remaining leave days.");
-//            throw new ResourceNotFoundException("You have exhausted your " + leaveRequest.getLeaveType().name().toLowerCase() + " leave limit of " + maxLeaves + " days. You have " + remainingLeaveDays + " remaining leave days.", String.valueOf(!leaveRequest.isLOP()));
+//        if (totalLeaveDaysTaken + requestedLeaveDays > maxLeaves) {
+//            throw new ResourceNotFoundException(true,"You have exhausted your " + leaveRequest.getLeaveType().name().toLowerCase() + " leave limit of " + maxLeaves + " days. You have " + remainingLeaveDays + " remaining leave days.");
+////            throw new ResourceNotFoundException("You have exhausted your " + leaveRequest.getLeaveType().name().toLowerCase() + " leave limit of " + maxLeaves + " days. You have " + remainingLeaveDays + " remaining leave days.", String.valueOf(!leaveRequest.isLOP()));
+//        }
+        if(requestedLeaveDays>remainingLeaveDays){
+            if(leaveRequest.isLOP()){
+                double lopDays= requestedLeaveDays - remainingLeaveDays;
+                leaveRequest.setLopDays(lopDays);
+            }else{
+                throw new ResourceNotFoundException(true, "You have exhausted your " + leaveRequest.getLeaveType().name().toLowerCase() +
+                        " leave limit of " + maxLeaves + " days. You have " + remainingLeaveDays + " remaining leave days.");
+            }
+        }else{
+            leaveRequest.setLopDays(0.0);
         }
     }
 

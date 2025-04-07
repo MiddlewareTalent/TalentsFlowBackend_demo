@@ -156,6 +156,14 @@ public class LeaveRequest {
         return comments;
     }
 
+    public Double getLopDays() {
+        return lopDays;
+    }
+
+    public void setLopDays(Double lopDays) {
+        this.lopDays = lopDays;
+    }
+
     public void setComments(String comments) {
         this.comments = comments;
     }
@@ -179,6 +187,7 @@ public class LeaveRequest {
     @Enumerated(EnumType.STRING)
     private LeaveType leaveType;
     private boolean LOP;
+    private Double lopDays;
     private Double duration;
     private String durationType;
     private String comments;
