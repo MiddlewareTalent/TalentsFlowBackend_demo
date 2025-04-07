@@ -392,7 +392,7 @@ public class EmployeeManagerController {
         return ResponseEntity.ok(reportingEmployees); // Return the list with 200 OK
     }
     
-    @GetMapping(value="/myColleague/{managerId}")
+    @GetMapping(value="/myColleague/{managerId}", produces = "application/json")
     public ResponseEntity<List<EmployeeManager>> getMyColleague(@PathVariable String managerId) throws Exception{
     	List<EmployeeManager> myColleague = employeeManagerService.getAllMyColleagues(managerId);//
     	if(myColleague.isEmpty()) {
