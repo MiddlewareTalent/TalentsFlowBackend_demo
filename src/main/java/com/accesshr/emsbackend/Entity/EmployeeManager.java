@@ -1,10 +1,16 @@
 package com.accesshr.emsbackend.Entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.*;
-import lombok.Data;
-
 import java.time.LocalDate;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
 
 @Data
 @Entity
@@ -41,6 +47,8 @@ public class EmployeeManager {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dateOfJoining;
 
+    
+    private boolean myColleagues;
     private boolean task;
     private boolean organizationChart;
     private boolean timeSheet;
@@ -55,6 +63,14 @@ public class EmployeeManager {
     private String password; // Added password field
 
     private String profilePhoto;
+
+    public boolean isMyColleagues(){//
+        return myColleagues;
+    }
+
+    public void setMyColleagues(){
+        this.myColleagues = myColleagues;
+    }
 
     public int getId() {
         return id;

@@ -1,9 +1,10 @@
 package com.accesshr.emsbackend.Dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.Column;
-
 import java.time.LocalDate;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import jakarta.persistence.Column;
 
 public class EmployeeManagerDTO {
     private int id;
@@ -32,6 +33,7 @@ public class EmployeeManagerDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dateOfJoining;
 
+    private boolean myColleagues;
     private boolean task;
     private boolean organizationChart;
     private boolean timeSheet;
@@ -46,6 +48,15 @@ public class EmployeeManagerDTO {
     private String otherDocuments;
 
     // Getters and setters
+
+    public boolean isMyColleagues(){
+        return myColleagues;
+    }
+
+    public void setMyColleagues(){
+        this.myColleagues= myColleagues;
+    }
+
     public String getFirstName() {
         return firstName;
     }
@@ -194,7 +205,7 @@ public class EmployeeManagerDTO {
         this.employeeId = employeeId;
     }
 
-    public void setCorporateEmail(String corporateEmail) {
+    public void setCorporateEmail(String corporateEmail) {//
         this.corporateEmail = corporateEmail;
     }
 

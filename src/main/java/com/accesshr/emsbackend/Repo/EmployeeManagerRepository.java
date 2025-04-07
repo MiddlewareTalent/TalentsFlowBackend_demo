@@ -47,6 +47,8 @@ public interface EmployeeManagerRepository extends JpaRepository<EmployeeManager
 
     @Query("SELECT e FROM EmployeeManager e WHERE e.role!='employee' ORDER BY e.firstName ASC, e.lastName ASC")
     List<EmployeeManager> getAdminsAndManagers();
+    
+   
                                                          
 
     

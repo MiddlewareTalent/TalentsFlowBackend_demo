@@ -1,11 +1,11 @@
 package com.accesshr.emsbackend.Service;
 
+import java.util.List;
+
 import com.accesshr.emsbackend.Dto.EmployeeManagerDTO;
 import com.accesshr.emsbackend.Dto.LoginDTO;
 import com.accesshr.emsbackend.Entity.EmployeeManager;
 import com.accesshr.emsbackend.response.LoginResponse;
-
-import java.util.List;
 
 public interface EmployeeManagerService {
 //    EmployeeManagerDTO addEmployee(EmployeeManagerDTO employeeManagerDTO);
@@ -43,5 +43,8 @@ public interface EmployeeManagerService {
     List <EmployeeManager> getAllEmployeesByOrder();
 
     List <EmployeeManager> getAllAdminsAndManagers();
+
+    List<EmployeeManager> getAllMyColleagues(String managerId);//
+    
 }
 
