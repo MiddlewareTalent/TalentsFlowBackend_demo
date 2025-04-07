@@ -43,5 +43,7 @@ public interface EmployeeManagerService {
     List <EmployeeManager> getAllEmployeesByOrder();
 
     List <EmployeeManager> getAllAdminsAndManagers();
+
+    List<EmployeeManager> getAllMyColleagues(String managerId);
 }
 

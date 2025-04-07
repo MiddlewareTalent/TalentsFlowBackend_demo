@@ -402,4 +402,19 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
         return employeeManagerRepository.getAdminsAndManagers();
     }
 
+	@Override
+	public List<EmployeeManager> getAllMyColleagues(String managerId) {
+		EmployeeManager emp = employeeManagerRepository.findByEmployeeId(managerId);
+        if (emp == null) {
+            return Collections.emptyList(); // Return empty list if employee does not exist
+        }
+        else{   
+            return employeeManagerRepository.findByReportingTo(managerId);
+        }
+	}
+
+	
+
+   
+
 }
