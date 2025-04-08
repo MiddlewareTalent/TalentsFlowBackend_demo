@@ -1,8 +1,23 @@
 
 
 
-
 package com.accesshr.emsbackend.EmployeeController;
+
+import com.accesshr.emsbackend.Dto.EmployeeManagerDTO;
+import com.accesshr.emsbackend.Dto.LoginDTO;
+import com.accesshr.emsbackend.Entity.EmployeeManager;
+import com.accesshr.emsbackend.Repo.EmployeeManagerRepository;
+import com.accesshr.emsbackend.Service.EmployeeManagerService;
+import com.accesshr.emsbackend.response.LoginResponse;
+import com.azure.storage.blob.*;
+import com.azure.storage.blob.models.BlobProperties;
+import com.azure.storage.blob.models.BlobStorageException;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.URL;
@@ -11,36 +26,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
-import com.accesshr.emsbackend.Dto.EmployeeManagerDTO;
-import com.accesshr.emsbackend.Dto.LoginDTO;
-import com.accesshr.emsbackend.Entity.EmployeeManager;
-import com.accesshr.emsbackend.Service.EmployeeManagerService;
-import com.accesshr.emsbackend.response.LoginResponse;
-import com.azure.storage.blob.BlobClient;
-import com.azure.storage.blob.BlobClientBuilder;
-import com.azure.storage.blob.BlobContainerClient;
-import com.azure.storage.blob.BlobServiceClient;
-import com.azure.storage.blob.BlobServiceClientBuilder;
-import com.azure.storage.blob.models.BlobProperties;
-import com.azure.storage.blob.models.BlobStorageException;
-
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/employeeManager")
@@ -54,9 +39,11 @@ public class EmployeeManagerController {
     private String containerName;
 
     private final EmployeeManagerService employeeManagerService;
+    private final EmployeeManagerRepository employeeManagerRepository;
 
-    public EmployeeManagerController(EmployeeManagerService employeeManagerService) {
+    public EmployeeManagerController(EmployeeManagerService employeeManagerService, EmployeeManagerRepository employeeManagerRepository) {
         this.employeeManagerService = employeeManagerService;
+        this.employeeManagerRepository = employeeManagerRepository;
     }
 
     // Add Employee method (used by admins to add employees)
@@ -84,12 +71,10 @@ public class EmployeeManagerController {
             @RequestParam(value = "organizationChart", required = false) boolean organizationChart,
             @RequestParam(value = "timeSheet", required = false) boolean timeSheet,
             @RequestParam(value = "leaveManagement", required = false) boolean leaveManagement,
-            @RequestParam(value="identityCard" ,required = false) MultipartFile identityCard,
+            @RequestParam(value = "identityCard", required = false) MultipartFile identityCard,
             @RequestParam(value = "visa", required = false) MultipartFile visa,
             @RequestParam(value = "otherDocuments", required = false) MultipartFile otherDocuments,
-            @RequestParam(value = "profilePhoto", required = false) MultipartFile profilePhoto)
-
-    {
+            @RequestParam(value = "profilePhoto", required = false) MultipartFile profilePhoto) {
 
         try {
             EmployeeManagerDTO employeeManagerDTO = new EmployeeManagerDTO();
@@ -115,14 +100,14 @@ public class EmployeeManagerController {
             employeeManagerDTO.setEmploymentStatus(employmentStatus);
             employeeManagerDTO.setReportingTo(reportingTo);
             employeeManagerDTO.setRole(role);
-            employeeManagerDTO.setProfilePhoto(saveOptionalFile(profilePhoto,"profilePhoto"));
+            employeeManagerDTO.setProfilePhoto(saveOptionalFile(profilePhoto, "profilePhoto"));
             // Save files and update DTO fields for certificates
             employeeManagerDTO.setIdentityCard(uploadFIle(identityCard, "nationalCard"));
             employeeManagerDTO.setVisa(saveOptionalFile(visa, "visa"));
             employeeManagerDTO.setOtherDocuments(saveOptionalFile(otherDocuments, "otherDocuments"));
 
-            if(employeeManagerService.existsByCorporateEmail(corporateEmail)){
-                throw new RuntimeException("Corporate email already exists: "+corporateEmail);
+            if (employeeManagerService.existsByCorporateEmail(corporateEmail)) {
+                throw new RuntimeException("Corporate email already exists: " + corporateEmail);
             }
             EmployeeManagerDTO employeeManager = employeeManagerService.addEmployee(employeeManagerDTO);
 
@@ -140,7 +125,7 @@ public class EmployeeManagerController {
             @Valid @RequestParam("firstName") String firstName,
             @RequestParam("lastName") String lastName,
             @RequestParam("email") String email,
-            @RequestParam("password") String password ) {
+            @RequestParam("password") String password) {
 
         EmployeeManagerDTO employeeManagerDTO = new EmployeeManagerDTO();
         employeeManagerDTO.setFirstName(firstName);
@@ -171,24 +156,24 @@ public class EmployeeManagerController {
         }
     }
 
-    public void init(){
+    public void init() {
         BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
                 .connectionString(connectionString)
                 .buildClient();
     }
 
-    public String uploadFIle(MultipartFile file, String caption) throws IOException{
-        String blobFilename=file.getOriginalFilename();
+    public String uploadFIle(MultipartFile file, String caption) throws IOException {
+        String blobFilename = file.getOriginalFilename();
 
         BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
                 .connectionString(connectionString)
                 .buildClient();
-        BlobClient blobClient=blobServiceClient
+        BlobClient blobClient = blobServiceClient
                 .getBlobContainerClient(containerName)
                 .getBlobClient(blobFilename);
 
         blobClient.upload(file.getInputStream(), file.getSize(), true);
-        String fileUrl=blobClient.getBlobUrl();
+        String fileUrl = blobClient.getBlobUrl();
 
         return fileUrl;
     }
@@ -238,7 +223,6 @@ public class EmployeeManagerController {
     }
 
 
-
     // Fetch all employees
     @GetMapping(value = "/employees", produces = "application/json")
     public ResponseEntity<?> getAllEmployees() {
@@ -266,17 +250,17 @@ public class EmployeeManagerController {
 //    }
 
     @GetMapping(value = "/employees/{id}", produces = "application/json")
-    public ResponseEntity<?> getEmployeeById(@PathVariable("id") int id){
-       try {
-           EmployeeManagerDTO employeeId = employeeManagerService.getById(id);
-           if (employeeId != null) {
-               return ResponseEntity.ok(employeeId);
-           }else {
-               return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee not found");
-           }
-       }catch (Exception e) {
-           return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch employee: " + e.getMessage());
-       }
+    public ResponseEntity<?> getEmployeeById(@PathVariable("id") int id) {
+        try {
+            EmployeeManagerDTO employeeId = employeeManagerService.getById(id);
+            if (employeeId != null) {
+                return ResponseEntity.ok(employeeId);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee not found");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch employee: " + e.getMessage());
+        }
     }
 
     // Delete an employee by ID
@@ -295,11 +279,11 @@ public class EmployeeManagerController {
 //    }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateEmployeeData(@PathVariable("id") int id, EmployeeManagerDTO employeeManagerDTO){
+    public ResponseEntity<?> updateEmployeeData(@PathVariable("id") int id, EmployeeManagerDTO employeeManagerDTO) {
         EmployeeManagerDTO updateEmp = employeeManagerService.updateEmployee(id, employeeManagerDTO);
         try {
             return ResponseEntity.ok(updateEmp);
-        }catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update employee: " + e.getMessage());
         }
     }
@@ -357,7 +341,7 @@ public class EmployeeManagerController {
     }
 
 
-    @GetMapping(value="/exists/{employeeId}" , produces = "application/json")
+    @GetMapping(value = "/exists/{employeeId}", produces = "application/json")
     public Boolean checkEmployeeExists(@PathVariable String employeeId) {
         boolean exists = employeeManagerService.isEmployeeIdPresent(employeeId);
 
@@ -367,6 +351,7 @@ public class EmployeeManagerController {
             return false;
         }
     }
+
     // Method to find the origin employee by their empId
     @GetMapping(value = "/origin/{employeeId}", produces = "application/json")
     public ResponseEntity<List<EmployeeManager>> getOriginEmployee(@PathVariable String employeeId) throws Exception {
@@ -378,9 +363,9 @@ public class EmployeeManagerController {
 
         return ResponseEntity.ok(reportingChain);  // Return the list of employees in the reporting chain
     }
-    
-    
-    @GetMapping(value= "/reporting-to/{employeeId}/{workingCountry}" , produces = "application/json")
+
+
+    @GetMapping(value = "/reporting-to/{employeeId}/{workingCountry}", produces = "application/json")
     public ResponseEntity<List<EmployeeManager>> getEmployeesReportingTo(@PathVariable String employeeId, @PathVariable String workingCountry) throws Exception {
         List<EmployeeManager> reportingEmployees = employeeManagerService.reportingToList(employeeId, workingCountry);
 
@@ -391,25 +376,25 @@ public class EmployeeManagerController {
 
         return ResponseEntity.ok(reportingEmployees); // Return the list with 200 OK
     }
-    
-    @GetMapping(value="/myColleague/{managerId}", produces = "application/json")
-    public ResponseEntity<List<EmployeeManager>> getMyColleague(@PathVariable String managerId) throws Exception{
-    	List<EmployeeManager> myColleague = employeeManagerService.getAllMyColleagues(managerId);//
-    	if(myColleague.isEmpty()) {
-    		throw new Exception("no employees found to ID: "+ managerId);
-    	}
-    	return ResponseEntity.ok(myColleague);
-    }
-    
-    @GetMapping(value = "/getEmployee/{employeeId}", produces = "application/json")
-    public EmployeeManager getEmployeeById(@PathVariable String employeeId){
-    	EmployeeManager employeeManager = employeeManagerService.getEmployeeById(employeeId);
-    	return employeeManager;
+
+    @GetMapping(value = "/myColleague/{managerId}", produces = "application/json")
+    public ResponseEntity<List<EmployeeManager>> getMyColleague(@PathVariable String managerId) throws Exception {
+        List<EmployeeManager> myColleague = employeeManagerService.getAllMyColleagues(managerId);//
+        if (myColleague.isEmpty()) {
+            throw new Exception("no employees found to ID: " + managerId);
+        }
+        return ResponseEntity.ok(myColleague);
     }
 
-    @GetMapping(value = "/alsoWorkingWith/{employeeId}/{workingCountry}",produces = "application/json")
+    @GetMapping(value = "/getEmployee/{employeeId}", produces = "application/json")
+    public EmployeeManager getEmployeeById(@PathVariable String employeeId) {
+        EmployeeManager employeeManager = employeeManagerService.getEmployeeById(employeeId);
+        return employeeManager;
+    }
+
+    @GetMapping(value = "/alsoWorkingWith/{employeeId}/{workingCountry}", produces = "application/json")
     public List<EmployeeManager> getAlsoWorkingWith(@PathVariable String employeeId, @PathVariable String workingCountry) throws Exception {
-        List<EmployeeManager> emp=employeeManagerService.alsoWorkingWith(employeeId, workingCountry);
+        List<EmployeeManager> emp = employeeManagerService.alsoWorkingWith(employeeId, workingCountry);
         return emp;
     }
 
@@ -430,18 +415,18 @@ public class EmployeeManagerController {
         try {
             boolean password = employeeManagerService.changePassword(loginDTO.getEmail(), loginDTO.getOldPassword(), loginDTO.getNewPassword());
             return ResponseEntity.ok(password);
-        }catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to change password: " + e.getMessage());
         }
     }
 
-    @GetMapping(value ="/getEmployeesByWorkingCountry/{workingCountry}",produces = "application/json")
-    public List <EmployeeManager> getEmployeesByWorkingCountry(@PathVariable String workingCountry){
+    @GetMapping(value = "/getEmployeesByWorkingCountry/{workingCountry}", produces = "application/json")
+    public List<EmployeeManager> getEmployeesByWorkingCountry(@PathVariable String workingCountry) {
         return employeeManagerService.getEmployeesByWorkingCountry(workingCountry);
     }
 
     @GetMapping(value = "/getEmployeesForTasks/{employeeId}", produces = "application/json")
-    public List <EmployeeManager> getReportingEmployeesForTasks(@PathVariable String employeeId){
+    public List<EmployeeManager> getReportingEmployeesForTasks(@PathVariable String employeeId) {
         return employeeManagerService.getReportingEmployeesForTasks(employeeId);
     }
 
@@ -469,6 +454,28 @@ public class EmployeeManagerController {
         }
     }
 
+    private void deleteBlob(String blobUrl) {
+        BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(connectionString).buildClient();
+        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerName);
+
+
+        if (blobUrl != null && !blobUrl.trim().isEmpty()) {
+            try {
+                URL url = new URL(blobUrl);
+                String blobName = url.getPath().substring(url.getPath().indexOf(containerName) + containerName.length() + 1);
+
+                BlobClient blobClient = containerClient.getBlobClient(blobName);
+                if (blobClient.exists()) {
+                    blobClient.delete();
+                    System.out.println("Successfully deleted blob: " + blobUrl);
+                }
+            } catch (Exception e) {
+                System.err.println("Error deleting blob: " + blobUrl + " - " + e.getMessage());
+            }
+        }
+
+    }
+
     @DeleteMapping("/employees/{id}")
     public ResponseEntity<String> deleteEmployee(@PathVariable int id) {
 
@@ -487,6 +494,39 @@ public class EmployeeManagerController {
             return ResponseEntity.status(500).body("Failed to delete employee");
         }
     }
+
+
+    public boolean deleteDocument(String employeeId, EmployeeManager employee) {
+        if (employee == null) {
+            throw new RuntimeException("Employee not found with id: " + employeeId);
+        } else {
+            String profileURL = employee.getProfilePhoto();
+            if (profileURL == null) {
+                throw new RuntimeException("Profile photo not found");
+            } else {
+                deleteBlob(profileURL);
+                return true;
+            }
+        }
+    }
+
+    @PutMapping(value = "/ProfilePhotoUpdate", produces = "application/json")
+    public ResponseEntity<?> updateProfilePhoto(
+            @Valid
+            @RequestParam("employeeId") String employeeId,
+            @RequestParam(value = "profilePhoto", required = false) MultipartFile profilePhoto) {
+        EmployeeManager employee = employeeManagerRepository.findByEmployeeId(employeeId);
+        deleteDocument(employeeId, employee);
+        try {
+            employee.setEmployeeId(employeeId);
+            employee.setProfilePhoto(saveOptionalFile(profilePhoto,"profilePhoto"));
+            EmployeeManager employeeManager = employeeManagerService.changeProfilePhoto(employeeId, employee);
+            return ResponseEntity.ok(employeeManager);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
+        }
+    }
+
 
     @GetMapping(value = "/employeesByOrder", produces = "application/json")
     public ResponseEntity<?> getAllEmployeesByOrder() {
