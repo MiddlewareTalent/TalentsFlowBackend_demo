@@ -6,6 +6,7 @@ import com.accesshr.emsbackend.Dto.EmployeeManagerDTO;
 import com.accesshr.emsbackend.Dto.LoginDTO;
 import com.accesshr.emsbackend.Entity.EmployeeManager;
 import com.accesshr.emsbackend.response.LoginResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface EmployeeManagerService {
 //    EmployeeManagerDTO addEmployee(EmployeeManagerDTO employeeManagerDTO);
@@ -45,6 +46,7 @@ public interface EmployeeManagerService {
     List <EmployeeManager> getAllAdminsAndManagers();
 
     List<EmployeeManager> getAllMyColleagues(String managerId);//
-    
+
+    EmployeeManager changeProfilePhoto(String employeeId,EmployeeManager employee);
 }
 

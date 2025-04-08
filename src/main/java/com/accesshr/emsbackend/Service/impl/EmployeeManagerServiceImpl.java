@@ -1,20 +1,5 @@
 package com.accesshr.emsbackend.Service.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
 import com.accesshr.emsbackend.Dto.EmployeeManagerDTO;
 import com.accesshr.emsbackend.Dto.LoginDTO;
 import com.accesshr.emsbackend.Entity.EmployeeManager;
@@ -22,6 +7,17 @@ import com.accesshr.emsbackend.Repo.EmployeeManagerRepository;
 import com.accesshr.emsbackend.Service.EmployeeManagerService;
 import com.accesshr.emsbackend.Service.JWT.JWTService;
 import com.accesshr.emsbackend.response.LoginResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class EmployeeManagerServiceImpl implements EmployeeManagerService {
@@ -113,25 +109,26 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
     @Override
     public LoginResponse loginEmployee(LoginDTO loginDTO) {
         EmployeeManager employee = employeeManagerRepository.findByCorporateEmail(loginDTO.getEmail());
-        if (employee!=null){
+        if (employee != null) {
             boolean isPasswordValid = new BCryptPasswordEncoder().matches(loginDTO.getPassword(), employee.getPassword());
-            if (isPasswordValid){
-                Authentication authentication=authManager.authenticate(
+            if (isPasswordValid) {
+                Authentication authentication = authManager.authenticate(
                         new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword()));
-                if (authentication.isAuthenticated()){
+                if (authentication.isAuthenticated()) {
                     String token = jwtService.generateToken(loginDTO.getEmail());
-                    return new LoginResponse("Login Success",true,employee.getRole(),token,employee.getFirstName(),employee.getLastName(),employee.getEmployeeId());                } else {
-                    return new LoginResponse("Authentication failed", false, null,null);
+                    return new LoginResponse("Login Success", true, employee.getRole(), token, employee.getFirstName(), employee.getLastName(), employee.getEmployeeId());
+                } else {
+                    return new LoginResponse("Authentication failed", false, null, null);
                 }
             } else {
-                return new LoginResponse("Password does not match", false, null,null);
+                return new LoginResponse("Password does not match", false, null, null);
             }
-        }else {
-            return new LoginResponse("Email not found", false, null,null);
+        } else {
+            return new LoginResponse("Email not found", false, null, null);
         }
     }
 
-    public boolean existsByCorporateEmail(String corporateEmail){
+    public boolean existsByCorporateEmail(String corporateEmail) {
         return employeeManagerRepository.existsByCorporateEmail(corporateEmail);
     }
 
@@ -143,7 +140,7 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
 
     @Override
 
-    public List <EmployeeManager> getEmployeesByWorkingCountry(String workingCountry){
+    public List<EmployeeManager> getEmployeesByWorkingCountry(String workingCountry) {
         return employeeManagerRepository.getEmployeeManagersByCountry(workingCountry);
     }
 
@@ -160,9 +157,9 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
     @Override
     public EmployeeManagerDTO getById(int id) {
         Optional<EmployeeManager> employeeId = employeeManagerRepository.findById(id);
-        if (employeeId.isEmpty()){
+        if (employeeId.isEmpty()) {
             return null;
-        }else {
+        } else {
             return convertToDTO(employeeId.get());
         }
     }
@@ -170,7 +167,7 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
     @Override
     public EmployeeManagerDTO updateEmployee(int id, EmployeeManagerDTO employeeManagerDTO) {
         EmployeeManager update = employeeManagerRepository.findById(id).orElseThrow(() -> new RuntimeException("Employee not found"));
-        if (update!=null){
+        if (update != null) {
             update.setFirstName(employeeManagerDTO.getFirstName());
             update.setLastName(employeeManagerDTO.getLastName());
             update.setEmail(employeeManagerDTO.getEmail());
@@ -262,14 +259,15 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
         return dto;
     }
 
-    @Override  /// updated now
+    @Override
+    /// updated now
     public boolean isEmployeeIdPresent(String employeeId) {
         return employeeManagerRepository.existsByEmployeeId(employeeId);
     }
 
     // Method to find the origin employee by their empId
     public List<EmployeeManager> findOrigin(String empId) throws Exception {
-        System.out.println("Employee Id: "+empId);
+        System.out.println("Employee Id: " + empId);
         List<EmployeeManager> reportingEmployees = new ArrayList<>();
 
         // Fetch the initial employee
@@ -278,7 +276,7 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
         // Check if the employee exists
         if (emp == null) {
             throw new Exception("Employee not found with ID: " + empId);
-       }
+        }
 
         reportingEmployees.add(emp);
 
@@ -286,7 +284,7 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
 
         // Loop until there are no more employees to fetch
         while (reportingEmpId != null) {
-           EmployeeManager superior = employeeManagerRepository.findByEmployeeId(reportingEmpId);
+            EmployeeManager superior = employeeManagerRepository.findByEmployeeId(reportingEmpId);
 
             // If superior is found, add it to the list
             if (superior != null) {
@@ -299,30 +297,29 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
 
         return reportingEmployees; // Return the list of employees
     }
-    
+
     public List<EmployeeManager> reportingToList(String empId, String workingCountry) {
         EmployeeManager emp = employeeManagerRepository.findByEmployeeId(empId);
         if (emp == null) {
             return Collections.emptyList(); // Return empty list if employee does not exist
         }
         System.out.println(workingCountry);
-        if(workingCountry.equals("all")){
+        if (workingCountry.equals("all")) {
             return employeeManagerRepository.findByReportingTo(empId);
-        }
-        else{
-            
+        } else {
+
             return employeeManagerRepository.findReportingTOByWorkingCountry(empId, workingCountry);
-    
+
         }
     }
-    
-    
-   public EmployeeManager getEmployeeById(String empId) {
-	   return employeeManagerRepository.findByEmployeeId(empId);
-	   
-   }
 
-    public List<EmployeeManager> alsoWorkingWith(String empId, String workingCountry)  throws Exception {
+
+    public EmployeeManager getEmployeeById(String empId) {
+        return employeeManagerRepository.findByEmployeeId(empId);
+
+    }
+
+    public List<EmployeeManager> alsoWorkingWith(String empId, String workingCountry) throws Exception {
 
         List<EmployeeManager> emp1 = employeeManagerRepository.findByReportingTo(empId);
         List<EmployeeManager> emp2 = findOrigin(empId);
@@ -334,22 +331,21 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
         List<EmployeeManager> emp4;
         System.out.println(workingCountry);
 
-        if(workingCountry.equals("all")){
-            
-             emp4 = emp3.stream()
-                .filter(emp -> emp.getEmployeeId() != null)
-                // Filter out employees in the merged list (emp1 + emp2)
-                .filter(emp -> mergedEmpList.stream().noneMatch(e -> e.getEmployeeId() != null && e.getEmployeeId().equals(emp.getEmployeeId())))
-                
-                .collect(Collectors.toList());
-        }
-        else{
-             emp4 = emp3.stream()
-                .filter(emp -> emp.getEmployeeId() != null)
-                // Filter out employees in the merged list (emp1 + emp2)
-                .filter(emp -> mergedEmpList.stream().noneMatch(e -> e.getEmployeeId() != null && e.getEmployeeId().equals(emp.getEmployeeId())))
-                .filter(emp->emp.getWorkingCountry().toLowerCase().equals(workingCountry.toLowerCase()))
-                .collect(Collectors.toList());
+        if (workingCountry.equals("all")) {
+
+            emp4 = emp3.stream()
+                    .filter(emp -> emp.getEmployeeId() != null)
+                    // Filter out employees in the merged list (emp1 + emp2)
+                    .filter(emp -> mergedEmpList.stream().noneMatch(e -> e.getEmployeeId() != null && e.getEmployeeId().equals(emp.getEmployeeId())))
+
+                    .collect(Collectors.toList());
+        } else {
+            emp4 = emp3.stream()
+                    .filter(emp -> emp.getEmployeeId() != null)
+                    // Filter out employees in the merged list (emp1 + emp2)
+                    .filter(emp -> mergedEmpList.stream().noneMatch(e -> e.getEmployeeId() != null && e.getEmployeeId().equals(emp.getEmployeeId())))
+                    .filter(emp -> emp.getWorkingCountry().toLowerCase().equals(workingCountry.toLowerCase()))
+                    .collect(Collectors.toList());
         }
         return emp4.size() <= 16 ? emp4 : emp4.subList(0, 16);
     }
@@ -375,9 +371,9 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
     public boolean changePassword(String email, String oldPassword, String newPassword) {
         EmployeeManager employeeManager = employeeManagerRepository.findByCorporateEmail(email);
         if (employeeManager == null) {
-            throw new RuntimeException("Employee not found with email: "+email);
+            throw new RuntimeException("Employee not found with email: " + email);
         }
-        if(!passwordEncoder.matches(oldPassword, employeeManager.getPassword())) {
+        if (!passwordEncoder.matches(oldPassword, employeeManager.getPassword())) {
             throw new RuntimeException("Old password is incorrect");
         }
         employeeManager.setPassword(passwordEncoder.encode(newPassword));
@@ -387,34 +383,36 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
 
     @Override
 
-    public List<EmployeeManager> getReportingEmployeesForTasks(String employeeId){
+    public List<EmployeeManager> getReportingEmployeesForTasks(String employeeId) {
         return employeeManagerRepository.findReportingEmployeesForTasks(employeeId, true);
     }
 
     @Override
-    public List <EmployeeManager> getAllEmployeesByOrder(){
+    public List<EmployeeManager> getAllEmployeesByOrder() {
         return employeeManagerRepository.findAllEmployeesBYOrder();
     }
 
     @Override
-    public List <EmployeeManager> getAllAdminsAndManagers(){
+    public List<EmployeeManager> getAllAdminsAndManagers() {
         return employeeManagerRepository.getAdminsAndManagers();
     }
 
-	@Override
-	public List<EmployeeManager> getAllMyColleagues(String managerId) {
-		EmployeeManager emp = employeeManagerRepository.findByEmployeeId(managerId);
-       
+    @Override
+    public List<EmployeeManager> getAllMyColleagues(String managerId) {
+        EmployeeManager emp = employeeManagerRepository.findByEmployeeId(managerId);
+
         if (emp == null) {
             return Collections.emptyList(); // Return empty list if employee does not exist
-        }
-        else{   
+        } else {
             return employeeManagerRepository.findByReportingTo(managerId);//
         }
-	}
+    }
 
-	
+    @Override
+    public EmployeeManager changeProfilePhoto(String employeeId, EmployeeManager employee) {
+       return employeeManagerRepository.save(employee);
 
-   
+    }
+
 
 }
