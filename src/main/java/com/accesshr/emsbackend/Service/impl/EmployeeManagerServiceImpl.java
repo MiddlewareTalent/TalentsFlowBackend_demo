@@ -16,6 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,6 +37,9 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private JavaMailSender emailSender;
+
 
     @Override
     public EmployeeManagerDTO addEmployee(EmployeeManagerDTO employeeManagerDTO) {
@@ -42,10 +47,20 @@ public class EmployeeManagerServiceImpl implements EmployeeManagerService {
     }
 
     @Transactional
-    public EmployeeManagerDTO addAdmin(EmployeeManagerDTO employeeManagerDTO) {
+    public EmployeeManagerDTO addAdmin(String company, EmployeeManagerDTO employeeManagerDTO) {
         // Set the role to Admin
         employeeManagerDTO.setRole("Admin");
-        return saveEmployee(employeeManagerDTO);
+        EmployeeManagerDTO empDto=saveEmployee(employeeManagerDTO);
+         String text="Dear " + employeeManagerDTO.getFirstName() + " " + employeeManagerDTO.getLastName() +
+                 ",\nPlease open this link: http://localhost:3000/" + company + "/login";
+
+      SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(employeeManagerDTO.getEmail());
+        message.setSubject("Talentflow registration");
+        message.setText(text);
+        emailSender.send(message);
+
+        return empDto;
     }
 
     private EmployeeManagerDTO saveEmployee(EmployeeManagerDTO employeeManagerDTO) {
