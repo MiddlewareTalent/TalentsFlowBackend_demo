@@ -29,7 +29,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/employeeManager")
-@CrossOrigin(origins = "https://mtldemofrontendapp.azurewebsites.net") // Adjust as needed for your frontend
+//@CrossOrigin(origins = "http://localhost:3000","https://mtldemofrontendapp.azurewebsites.net") // Adjust as needed for your frontend
 public class EmployeeManagerController {
 
     @Value("${azure.storage.connection-string}")
@@ -526,6 +526,19 @@ public class EmployeeManagerController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
         }
     }
+
+    //Delete Profile 
+    @DeleteMapping(value = "/ProfilePhotoDelete", produces = "application/json")
+    public ResponseEntity<?> deleteProfilePhoto (
+            @Valid
+            @RequestParam("employeeId") String employeeId){
+        EmployeeManager employee = employeeManagerRepository.findByEmployeeId(employeeId);
+        deleteDocument(employeeId, employee);
+        employee.setProfilePhoto(null);
+        return ResponseEntity.ok("Profile Photo Deleted Successfully");
+    }
+
+
 
 
     @GetMapping(value = "/employeesByOrder", produces = "application/json")
