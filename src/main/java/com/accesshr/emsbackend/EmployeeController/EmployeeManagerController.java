@@ -1,10 +1,8 @@
-
-
-
 package com.accesshr.emsbackend.EmployeeController;
 
 import com.accesshr.emsbackend.Dto.EmployeeManagerDTO;
 import com.accesshr.emsbackend.Dto.LoginDTO;
+import com.accesshr.emsbackend.EmployeeController.Config.TenantContext;
 import com.accesshr.emsbackend.Entity.EmployeeManager;
 import com.accesshr.emsbackend.Repo.EmployeeManagerRepository;
 import com.accesshr.emsbackend.Service.EmployeeManagerService;
@@ -162,21 +160,48 @@ public class EmployeeManagerController {
                 .buildClient();
     }
 
+//    public String uploadFIle(MultipartFile file, String caption) throws IOException {
+//        String blobFilename = file.getOriginalFilename();
+//
+//        BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
+//                .connectionString(connectionString)
+//                .buildClient();
+//        BlobClient blobClient = blobServiceClient
+//                .getBlobContainerClient(containerName)
+//                .getBlobClient(blobFilename);
+//
+//        blobClient.upload(file.getInputStream(), file.getSize(), true);
+//        String fileUrl = blobClient.getBlobUrl();
+//
+//        return fileUrl;
+//    }
+
     public String uploadFIle(MultipartFile file, String caption) throws IOException {
+        String tenantId = TenantContext.getTenantId();
+        if (tenantId == null || tenantId.isBlank()) {
+            throw new IllegalStateException("Tenant ID is missing from context");
+        }
+
+        String containerForTenant = tenantId.toLowerCase() + "-container";
         String blobFilename = file.getOriginalFilename();
 
         BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
                 .connectionString(connectionString)
                 .buildClient();
-        BlobClient blobClient = blobServiceClient
-                .getBlobContainerClient(containerName)
-                .getBlobClient(blobFilename);
 
+        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerForTenant);
+
+        // Create container if it does not exist
+        if (!containerClient.exists()) {
+            containerClient.create();
+        }
+
+        BlobClient blobClient = containerClient.getBlobClient(blobFilename);
         blobClient.upload(file.getInputStream(), file.getSize(), true);
-        String fileUrl = blobClient.getBlobUrl();
 
-        return fileUrl;
+        return blobClient.getBlobUrl();
     }
+
 
     private String saveFile(MultipartFile file, String fileType) throws IOException {
         if (file == null || file.isEmpty()) {
@@ -455,15 +480,19 @@ public class EmployeeManagerController {
     }
 
     private void deleteBlob(String blobUrl) {
+        String tenantId = TenantContext.getTenantId();
+        if (tenantId == null || tenantId.isBlank()) {
+            throw new IllegalStateException("Tenant ID is missing from context");
+        }
+        String containerForTenant = tenantId.toLowerCase() + "-container";
         BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(connectionString).buildClient();
-        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerName);
-
+        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerForTenant);
 
         if (blobUrl != null && !blobUrl.trim().isEmpty()) {
             try {
                 URL url = new URL(blobUrl);
-                String blobName = url.getPath().substring(url.getPath().indexOf(containerName) + containerName.length() + 1);
-
+//                String blobName = url.getPath().substring(url.getPath().indexOf(containerName) + containerName.length() + 1);
+                String blobName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
                 BlobClient blobClient = containerClient.getBlobClient(blobName);
                 if (blobClient.exists()) {
                     blobClient.delete();
