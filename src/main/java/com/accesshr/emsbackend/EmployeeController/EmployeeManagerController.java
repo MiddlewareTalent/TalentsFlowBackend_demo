@@ -1,13 +1,12 @@
-
-
-
 package com.accesshr.emsbackend.EmployeeController;
 
 import com.accesshr.emsbackend.Dto.EmployeeManagerDTO;
 import com.accesshr.emsbackend.Dto.LoginDTO;
+import com.accesshr.emsbackend.EmployeeController.Config.TenantContext;
 import com.accesshr.emsbackend.Entity.EmployeeManager;
 import com.accesshr.emsbackend.Repo.EmployeeManagerRepository;
 import com.accesshr.emsbackend.Service.EmployeeManagerService;
+import com.accesshr.emsbackend.Service.TenantSchemaService;
 import com.accesshr.emsbackend.response.LoginResponse;
 import com.azure.storage.blob.*;
 import com.azure.storage.blob.models.BlobProperties;
@@ -40,11 +39,15 @@ public class EmployeeManagerController {
 
     private final EmployeeManagerService employeeManagerService;
     private final EmployeeManagerRepository employeeManagerRepository;
+    private final TenantSchemaService tenantSchemaService;
+   
 
-    public EmployeeManagerController(EmployeeManagerService employeeManagerService, EmployeeManagerRepository employeeManagerRepository) {
+    public EmployeeManagerController(EmployeeManagerService employeeManagerService, EmployeeManagerRepository employeeManagerRepository, TenantSchemaService tenantSchemaService) {
         this.employeeManagerService = employeeManagerService;
         this.employeeManagerRepository = employeeManagerRepository;
+        this.tenantSchemaService=tenantSchemaService;
     }
+
 
     // Add Employee method (used by admins to add employees)
     @PostMapping(value = "/add", produces = "application/json")
@@ -120,23 +123,28 @@ public class EmployeeManagerController {
     }
 
     // Registration endpoint (for Admins)
-    @PostMapping(value = "/register", produces = "application/json")
+    @PostMapping(value = "/register/{company}", produces = "application/json")
     public ResponseEntity<?> registerAdmin(
             @Valid @RequestParam("firstName") String firstName,
             @RequestParam("lastName") String lastName,
             @RequestParam("email") String email,
-            @RequestParam("password") String password) {
+            @RequestParam("employeeId") String employeeId,
+            @RequestParam("password") String password,@PathVariable String company) {
 
         EmployeeManagerDTO employeeManagerDTO = new EmployeeManagerDTO();
         employeeManagerDTO.setFirstName(firstName);
         employeeManagerDTO.setLastName(lastName);
         employeeManagerDTO.setEmail(email);
         employeeManagerDTO.setCorporateEmail(email); // Set corporate email to the same email for registration
+        employeeManagerDTO.setEmployeeId(employeeId);
         employeeManagerDTO.setRole("admin"); // Default role for admin
         employeeManagerDTO.setPassword(password); // Set plain text password
-
         try {
-            EmployeeManagerDTO registeredAdmin = employeeManagerService.addAdmin(employeeManagerDTO);
+            
+            tenantSchemaService.createTenant(company);
+            company=company.replace(" ", "_");
+            TenantContext.setTenantId(company);
+            EmployeeManagerDTO registeredAdmin = employeeManagerService.addAdmin(company,employeeManagerDTO);
             return ResponseEntity.ok(registeredAdmin);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Registration failed: " + e.getMessage());
@@ -162,21 +170,49 @@ public class EmployeeManagerController {
                 .buildClient();
     }
 
+//    public String uploadFIle(MultipartFile file, String caption) throws IOException {
+//        String blobFilename = file.getOriginalFilename();
+//
+//        BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
+//                .connectionString(connectionString)
+//                .buildClient();
+//        BlobClient blobClient = blobServiceClient
+//                .getBlobContainerClient(containerName)
+//                .getBlobClient(blobFilename);
+//
+//        blobClient.upload(file.getInputStream(), file.getSize(), true);
+//        String fileUrl = blobClient.getBlobUrl();
+//
+//        return fileUrl;
+//    }
+
     public String uploadFIle(MultipartFile file, String caption) throws IOException {
+        String tenantId = TenantContext.getTenantId();
+        tenantId=tenantId.replace("_","-");
+        if (tenantId == null || tenantId.isBlank()) {
+            throw new IllegalStateException("Tenant ID is missing from context");
+        }
+
+        String containerForTenant = tenantId.toLowerCase() + "-container";
         String blobFilename = file.getOriginalFilename();
 
         BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
                 .connectionString(connectionString)
                 .buildClient();
-        BlobClient blobClient = blobServiceClient
-                .getBlobContainerClient(containerName)
-                .getBlobClient(blobFilename);
 
+        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerForTenant);
+
+        // Create container if it does not exist
+        if (!containerClient.exists()) {
+            containerClient.create();
+        }
+
+        BlobClient blobClient = containerClient.getBlobClient(blobFilename);
         blobClient.upload(file.getInputStream(), file.getSize(), true);
-        String fileUrl = blobClient.getBlobUrl();
 
-        return fileUrl;
+        return blobClient.getBlobUrl();
     }
+
 
     private String saveFile(MultipartFile file, String fileType) throws IOException {
         if (file == null || file.isEmpty()) {
@@ -455,15 +491,20 @@ public class EmployeeManagerController {
     }
 
     private void deleteBlob(String blobUrl) {
+        String tenantId = TenantContext.getTenantId();
+        tenantId=tenantId.replace("_", "-");
+        if (tenantId == null || tenantId.isBlank()) {
+            throw new IllegalStateException("Tenant ID is missing from context");
+        }
+        String containerForTenant = tenantId.toLowerCase() + "-container";
         BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(connectionString).buildClient();
-        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerName);
-
+        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerForTenant);
 
         if (blobUrl != null && !blobUrl.trim().isEmpty()) {
             try {
                 URL url = new URL(blobUrl);
-                String blobName = url.getPath().substring(url.getPath().indexOf(containerName) + containerName.length() + 1);
-
+//                String blobName = url.getPath().substring(url.getPath().indexOf(containerName) + containerName.length() + 1);
+                String blobName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
                 BlobClient blobClient = containerClient.getBlobClient(blobName);
                 if (blobClient.exists()) {
                     blobClient.delete();

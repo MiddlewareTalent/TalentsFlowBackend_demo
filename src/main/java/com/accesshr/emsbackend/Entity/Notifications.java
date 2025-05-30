@@ -10,7 +10,6 @@ import java.util.*;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class Notifications {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
