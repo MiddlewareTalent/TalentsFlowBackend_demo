@@ -3,8 +3,7 @@ name: Deploy Spring Boot Application to Azure App Service
 on:
   push:
     branches:
-      - multitenant-for-blobs  # Change this to the branch you want to trigger the workflow
- 
+      - multitenant-for-blobs  
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
