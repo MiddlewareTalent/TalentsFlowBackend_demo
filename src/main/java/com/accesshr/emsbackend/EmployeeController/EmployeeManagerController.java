@@ -188,6 +188,7 @@ public class EmployeeManagerController {
 
     public String uploadFIle(MultipartFile file, String caption) throws IOException {
         String tenantId = TenantContext.getTenantId();
+        tenantId=tenantId.replace("_","-");
         if (tenantId == null || tenantId.isBlank()) {
             throw new IllegalStateException("Tenant ID is missing from context");
         }
@@ -491,6 +492,7 @@ public class EmployeeManagerController {
 
     private void deleteBlob(String blobUrl) {
         String tenantId = TenantContext.getTenantId();
+        tenantId=tenantId.replace("_", "-");
         if (tenantId == null || tenantId.isBlank()) {
             throw new IllegalStateException("Tenant ID is missing from context");
         }

@@ -1,5 +1,6 @@
 package com.accesshr.emsbackend.EmployeeController.LeaveController;
 
+import com.accesshr.emsbackend.EmployeeController.Config.TenantContext;
 import com.accesshr.emsbackend.Entity.LeaveRequest;
 import com.accesshr.emsbackend.Service.LeaveService.LeaveRequestServiceImpl;
 import com.accesshr.emsbackend.Util.HolidaysUtil;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.net.URL;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -100,22 +102,32 @@ public class LeaveRequestController {
         }
     }
 
-    public String uploadFIle(MultipartFile file, String caption) throws IOException{
-        String blobFilename=file.getOriginalFilename();
-
+    public String uploadFIle(MultipartFile file, String caption) throws IOException {
+        String tenantId = TenantContext.getTenantId();
+        tenantId=tenantId.replace("_","-");
+        if (tenantId == null || tenantId.isBlank()) {
+            throw new IllegalStateException("Tenant ID is missing from context");
+        }
+ 
+        String containerForTenant = tenantId.toLowerCase() + "-container";
+        String blobFilename = file.getOriginalFilename();
+ 
         BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
                 .connectionString(connectionString)
                 .buildClient();
-        BlobClient blobClient=blobServiceClient
-                .getBlobContainerClient(containerName)
-                .getBlobClient(blobFilename);
-
+ 
+        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerForTenant);
+ 
+        // Create container if it does not exist
+        if (!containerClient.exists()) {
+            containerClient.create();
+        }
+ 
+        BlobClient blobClient = containerClient.getBlobClient(blobFilename);
         blobClient.upload(file.getInputStream(), file.getSize(), true);
-        String fileUrl=blobClient.getBlobUrl();
-
-        return fileUrl;
+ 
+        return blobClient.getBlobUrl();
     }
-
     private String saveFile(MultipartFile file, String fileType) throws IOException {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("The file cannot be null or empty.");
@@ -178,10 +190,62 @@ public class LeaveRequestController {
        return leaveRequestServiceImpl.getEmpAndLeaveStatus(employeeId);
     }
 
+    // @DeleteMapping("/delete/{id}")
+    // public ResponseEntity<String> deleteLeaveRequest(@PathVariable Long id) {
+    //     String deleteRequest = leaveRequestServiceImpl.deleteLeaveRequest(id);
+    //     return ResponseEntity.ok(deleteRequest);
+    // }
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteLeaveRequest(@PathVariable Long id) {
-        String deleteRequest = leaveRequestServiceImpl.deleteLeaveRequest(id);
-        return ResponseEntity.ok(deleteRequest);
+        try {
+            String tenantId = TenantContext.getTenantId(); // Set the tenant context (thread-local)
+            tenantId=tenantId.replace("_","-");
+            if (tenantId == null || tenantId.isBlank()) {
+                throw new IllegalStateException("Tenant ID is missing from context");
+            }
+ 
+            LeaveRequest leaveRequest = leaveRequestServiceImpl.getLeaveRequestById(id);
+            String medicalDocumentUrl = leaveRequest.getMedicalDocument();
+ 
+            if (medicalDocumentUrl != null && !medicalDocumentUrl.isBlank()) {
+                deleteBlobForTenant(medicalDocumentUrl, tenantId); // Pass tenant ID
+            }
+ 
+            String response = leaveRequestServiceImpl.deleteLeaveRequest(id);
+            return ResponseEntity.ok(response);
+        } catch (ResourceNotFoundException e) {
+            return new ResponseEntity<String>(String.valueOf(e.getMap()), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        } finally {
+            TenantContext.clear(); // Clean up thread-local
+        }
+    }
+
+    private void deleteBlobForTenant(String blobUrl, String tenantId) {
+        try {
+            String containerForTenant = tenantId.toLowerCase() + "-container";
+ 
+            BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
+                    .connectionString(connectionString)
+                    .buildClient();
+ 
+            BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerForTenant);
+            // Extract blob name from URL
+            URL url = new URL(blobUrl);
+            String blobName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
+ 
+            BlobClient blobClient = containerClient.getBlobClient(blobName);
+            if (blobClient.exists()) {
+                blobClient.delete();
+                System.out.println("Deleted blob from container [" + containerForTenant + "]: " + blobName);
+            } else {
+                System.out.println("Blob not found in container [" + containerForTenant + "]: " + blobName);
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to delete blob: " + e.getMessage());
+        }
     }
 
     @GetMapping("/remaining-leaves")
