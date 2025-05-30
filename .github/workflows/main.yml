@@ -3,7 +3,7 @@ name: Deploy Spring Boot Application to Azure App Service
 on:
   push:
     branches:
-      - multitenant-for-blobs  
+      - main  
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
